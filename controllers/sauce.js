@@ -64,7 +64,13 @@ exports.modifySauce = (req, res, next) => {
           { _id: req.params.id },
           { ...sauceObject, _id: req.params.id }
         )
-          .then(() => res.status(200).json({ message: "Objet modifié !" }))
+          .then(() => {
+            const imageName = sauce.imageUrl.split("/images/")[1];
+            fs.unlink(`images/${imageName}`, (error) => {
+              if (error) throw error;
+            });
+            res.status(200).json({ message: "objet modifié !" });
+          })
           .catch((error) => res.status(401).json({ error }));
       }
     })
@@ -83,7 +89,7 @@ exports.deleteSauce = (req, res, next) => {
         });
       } else {
         const filename = sauce.imageUrl.split("/images/")[1];
-        fs.unlink(`images/${filename}`, () => {
+        fs.unlink(`images/${filename}`, (error) => {
           sauce
             .deleteOne({ _id: req.params.id })
             .then(() => {
